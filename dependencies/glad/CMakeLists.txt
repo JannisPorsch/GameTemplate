@@ -1,0 +1,2 @@
+add_library(glad OBJECT src/glad.c)
+target_include_directories(glad PRIVATE include)
