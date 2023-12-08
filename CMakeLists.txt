@@ -55,7 +55,7 @@ FOREACH(dir ${SUBDIRS})
                 PRIVATE ${OPENGL_INCLUDE_DIRS}
             )
 
-            string(APPEND LIBRARIES " ${tmp}")
+            string(APPEND LIBRARIES ";${tmp}")
         ENDIF()
     ENDIF()
 ENDFOREACH()

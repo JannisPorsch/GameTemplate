@@ -1,4 +1,17 @@
+#include "main.h"
+#include "core/gameloop.h"
+
+
+
+
+// TODO fix absolute paths
+
+
+
+
 int main()
-{
-    return 0;
+{    
+    DBG("[*] debug mode active\n");
+
+    return gameLoop();
 }
