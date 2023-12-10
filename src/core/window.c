@@ -170,6 +170,7 @@ void setFullscreen(bool fullscreen)
 void setVSync(bool vsync)
 {
     glfwSwapInterval(vsync ? 1 : 0);
+    mainWindow.vsync = vsync;
 }
 
 
