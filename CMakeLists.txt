@@ -62,4 +62,3 @@ ENDFOREACH()
 
 
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES} ${OPENGL_LIBRARIES} glad glfw)
-# target_link_libraries(${PROJECT_NAME} ${LIBRARIES} ${OPENGL_LIBRARIES} glad glfw cglm stb_image)

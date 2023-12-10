@@ -19,12 +19,13 @@ typedef struct _WINDOW
     int width;
     int height;
     bool fullscreen;
+    bool vsync;
 } WINDOW, *PWINDOW;
 
 
 
 
-bool createWindow(const char* title, int width, int height);
+bool createMainWindow();
 
 
 void windowCleanup();
@@ -33,10 +34,10 @@ void windowCleanup();
 bool isWindowOpen();
 
 
-void toggleFullscreen();
+void setFullscreen(bool fullscreen);
 
 
-void updateVSync();
+void setVSync(bool vsync);
 
 
 

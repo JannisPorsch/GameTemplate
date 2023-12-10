@@ -1,20 +1,13 @@
 #include "gameloop.h"
 #include "main.h"
 #include "window.h"
-
-
-
-
-static const char* TITLE = "GameTemplate";
-static const int WIDTH = 800, HEIGHT = 600;
+#include "io/options.h"
 
 
 
 
 static bool gameInit();
 static void gameCleanup();
-
-
 static void globalUpdate();
 static void globalRender(double alpha);
 
@@ -23,7 +16,7 @@ static void globalRender(double alpha);
 
 int gameLoop()
 {
-    if(!gameInit())
+    if (!gameInit())
         return -1;
     
     double t = 0.0;
@@ -42,8 +35,7 @@ int gameLoop()
         double frameTime = newTime - currentTime;
         oneSecTimer += frameTime;
 
-        if (frameTime > 0.25)
-            frameTime = 0.25;
+        if (frameTime > 0.25) frameTime = 0.25;
         
         currentTime = newTime;
         accumulator += frameTime;
@@ -59,7 +51,7 @@ int gameLoop()
         globalRender(accumulator / dt);
         fps++;
 
-        if(oneSecTimer >= 1.0)
+        if (oneSecTimer >= 1.0)
         {
             oneSecTimer -= 1.0;
             fps = 0;
@@ -76,16 +68,23 @@ int gameLoop()
 
 static bool gameInit()
 {
-    if(!createWindow(TITLE, WIDTH, HEIGHT))
-        return 0;
+    if (!optionsInit())
+        return false;
+
+    if (!createMainWindow())
+    {
+        optionsCleanup();
+        return false;
+    }
     
-    return 1;
+    return true;
 }
 
 
 static void gameCleanup()
 {
     windowCleanup();
+    optionsCleanup();
 }
 
 

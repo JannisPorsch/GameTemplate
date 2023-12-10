@@ -1,5 +1,5 @@
 #include "window.h"
-// #include "options.h"
+#include "io/options.h"
 
 
 
@@ -7,8 +7,8 @@
 WINDOW mainWindow = { 0 };
 
 
-static bool glfwInitialised = 0;
-static bool videoModeSet = 0;
+static bool glfwInitialised = false;
+static bool videoModeSet = false;
 
 
 
@@ -19,12 +19,12 @@ static void mouse_callback(GLFWwindow* window, double xPos, double yPos);
 
 
 
-bool createWindow(const char* title, int width, int height)
+bool createMainWindow()
 {
-    if (!title || width <= 0 || height <= 0)
+    if (OPTION_WINDOW_WIDTH <= 0 || OPTION_WINDOW_HEIGHT <= 0)
     {
-        ERROR("invalid function arguments - createMainWindow()");
-        return 0;
+        ERROR("options not initialized when calling createMainWindow()");
+        return false;
     }
 
     if (!glfwInitialised)
@@ -32,23 +32,25 @@ bool createWindow(const char* title, int width, int height)
         if (glfwInit() != GLFW_TRUE)
         {
             ERROR("glfwInit()");
-            return 0;
+            return false;
         }
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         
-        glfwInitialised = 1;
+        glfwInitialised = true;
     }
 
-    if (0) // OPTION_FULLSCREEN
+    int viewportWidth = OPTION_WINDOW_WIDTH, viewportHeight = OPTION_WINDOW_HEIGHT;
+
+    if (OPTION_FULLSCREEN)
     {
-        mainWindow.width = width;
-        mainWindow.height = height;
+        mainWindow.width = OPTION_WINDOW_WIDTH;
+        mainWindow.height = OPTION_WINDOW_HEIGHT;
 
         GLFWmonitor* mon = glfwGetPrimaryMonitor();
-        if(!mon)
+        if (!mon)
         {
             ERROR("glfwGetPrimaryMonitor()");
             windowCleanup();
@@ -56,7 +58,7 @@ bool createWindow(const char* title, int width, int height)
         }
 
         const GLFWvidmode* mode = glfwGetVideoMode(mon);
-        if(!mode)
+        if (!mode)
         {
             ERROR("glfwGetVideoMode()");
             windowCleanup();
@@ -68,13 +70,15 @@ bool createWindow(const char* title, int width, int height)
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-        videoModeSet = 1;
+        videoModeSet = true;
 
-        mainWindow.handle = glfwCreateWindow(mode->width, mode->height, title, mon, NULL);
+        mainWindow.handle = glfwCreateWindow(mode->width, mode->height, OPTION_WINDOW_TITLE, mon, NULL);
+        viewportWidth = mode->width;
+        viewportHeight = mode->height;
     }
     else
     {
-        mainWindow.handle = glfwCreateWindow(width, height, title, NULL, NULL);
+        mainWindow.handle = glfwCreateWindow(OPTION_WINDOW_WIDTH, OPTION_WINDOW_HEIGHT, OPTION_WINDOW_TITLE, NULL, NULL);
     }
 
     if (!mainWindow.handle)
@@ -85,7 +89,6 @@ bool createWindow(const char* title, int width, int height)
     }
 
     glfwMakeContextCurrent(mainWindow.handle);
-    updateVSync();
 
     glfwSetInputMode(mainWindow.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(mainWindow.handle, mouse_callback);
@@ -97,50 +100,52 @@ bool createWindow(const char* title, int width, int height)
         return 0;
     }
 
-    mainWindow.fullscreen = 0;// OPTION_FULLSCREEN ? 1 : 0;
+    setVSync(OPTION_VSYNC);
+    mainWindow.vsync = OPTION_VSYNC;
+    mainWindow.fullscreen = OPTION_FULLSCREEN;
 
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, viewportWidth, viewportHeight);
     glfwSetFramebufferSizeCallback(mainWindow.handle, framebuffer_size_callback);
 
-    return 1;
+    return true;
 }
 
 
 void windowCleanup()
 {
-    if(mainWindow.handle)
+    if (mainWindow.handle)
         glfwDestroyWindow(mainWindow.handle);
     
-    if(glfwInitialised)
+    if (glfwInitialised)
         glfwTerminate();
 
-    glfwInitialised = 0;
-    videoModeSet = 0;
+    glfwInitialised = false;
+    videoModeSet = false;
 }
 
 
 bool isWindowOpen()
 {
-    return glfwWindowShouldClose(mainWindow.handle) ? 0 : 1;
+    return glfwWindowShouldClose(mainWindow.handle) ? false : true;
 }
 
 
-void toggleFullscreen()
+void setFullscreen(bool fullscreen)
 {
-    if(mainWindow.fullscreen)
+    if (!fullscreen && mainWindow.fullscreen)
     {
         glfwSetWindowMonitor(mainWindow.handle, NULL, mainWindow.x, mainWindow.y, mainWindow.width, mainWindow.height, 0);
-        mainWindow.fullscreen = 0;
+        mainWindow.fullscreen = false;
     }
-    else
+    else if (fullscreen && !mainWindow.fullscreen)
     {
         GLFWmonitor* mon = glfwGetPrimaryMonitor();
-        if(mon)
+        if (mon)
         {
             const GLFWvidmode* mode = glfwGetVideoMode(mon);
-            if(mode)
+            if (mode)
             {
-                if(!videoModeSet)
+                if (!videoModeSet)
                 {
                     glfwWindowHint(GLFW_RED_BITS, mode->redBits);
                     glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
@@ -151,7 +156,7 @@ void toggleFullscreen()
                 glfwGetWindowPos(mainWindow.handle, &mainWindow.x, &mainWindow.y);
                 glfwGetWindowSize(mainWindow.handle, &mainWindow.width, &mainWindow.height);
                 glfwSetWindowMonitor(mainWindow.handle, mon, 0, 0, mode->width, mode->height, mode->refreshRate);
-                mainWindow.fullscreen = 1;
+                mainWindow.fullscreen = true;
             }
             else ERROR("glfwGetVideoMode()");
 
@@ -162,9 +167,9 @@ void toggleFullscreen()
 }
 
 
-void updateVSync()
+void setVSync(bool vsync)
 {
-    glfwSwapInterval(0 ? 1 : 0); // OPTION_VSYNC
+    glfwSwapInterval(vsync ? 1 : 0);
 }
 
 
