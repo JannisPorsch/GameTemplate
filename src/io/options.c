@@ -1,4 +1,5 @@
 #include "options.h"
+#include <GLFW/glfw3.h>
 #include <errno.h>
 #include <stdio.h>
 #include <arpa/inet.h>
@@ -15,6 +16,7 @@ static const char* optionsFilePath = "gamedata";
 int OPTION_WINDOW_WIDTH = -1, OPTION_WINDOW_HEIGHT = -1;
 char OPTION_WINDOW_TITLE[256] = { 0 };
 bool OPTION_FULLSCREEN = false, OPTION_VSYNC = false;
+int OPTION_KEYMAP[KEY_AMOUNT] = { 0 };
 
 
 
@@ -87,6 +89,12 @@ static bool readOptions(FILE* f)
 
     if (fread(&buffer, 1, sizeof(u32), f) != sizeof(u32)) return false;
     OPTION_VSYNC = (ntohl(buffer) & 0xFF) ? true : false;
+
+    for (u8 i = 0; i < KEY_AMOUNT; i++)
+    {
+        if (fread(&buffer, 1, sizeof(u32), f) != sizeof(u32)) return false;
+        OPTION_KEYMAP[i] = (int)ntohl(buffer);
+    }
     
     return true;
 }
@@ -116,6 +124,12 @@ static bool writeOptions()
     buffer = htonl((u32)OPTION_VSYNC);
     if (fwrite(&buffer, 1, sizeof(u32), f) != sizeof(u32)) retval = false;
 
+    for (u8 i = 0; i < KEY_AMOUNT; i++)
+    {
+        buffer = htonl((u32)OPTION_KEYMAP[i]);
+        if (fwrite(&buffer, 1, sizeof(u32), f) != sizeof(u32)) retval = false;
+    }
+
     fclose(f);
     return retval;
 }
@@ -125,8 +139,24 @@ static void setOptionsDefault()
 {
     OPTION_WINDOW_WIDTH = 800;
     OPTION_WINDOW_HEIGHT = 600;
+
     const char* tmpTitle = "GameTemplate";
     for (u8 i = 0; i < 13; i++) OPTION_WINDOW_TITLE[i] = tmpTitle[i];
+
     OPTION_FULLSCREEN = false;
     OPTION_VSYNC = true;
+
+    int tmpKeyMap[KEY_AMOUNT] =
+    {
+        GLFW_KEY_ESCAPE,
+        GLFW_KEY_ENTER,
+        GLFW_KEY_SPACE,
+        GLFW_KEY_LEFT_SHIFT,
+        GLFW_KEY_W,
+        GLFW_KEY_A,
+        GLFW_KEY_S,
+        GLFW_KEY_D,
+        GLFW_KEY_F
+    };
+    for (u8 i = 0; i < KEY_AMOUNT; i++) OPTION_KEYMAP[i] = tmpKeyMap[i];
 }

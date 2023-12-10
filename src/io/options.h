@@ -5,6 +5,7 @@
 
 
 #include "main.h"
+#include "input.h"
 
 
 
@@ -20,6 +21,7 @@ void optionsCleanup();
 extern int OPTION_WINDOW_WIDTH, OPTION_WINDOW_HEIGHT;
 extern char OPTION_WINDOW_TITLE[256];
 extern bool OPTION_FULLSCREEN, OPTION_VSYNC;
+extern int OPTION_KEYMAP[KEY_AMOUNT];
 
 
 

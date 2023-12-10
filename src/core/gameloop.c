@@ -2,6 +2,7 @@
 #include "main.h"
 #include "window.h"
 #include "io/options.h"
+#include "io/input.h"
 
 
 
@@ -90,6 +91,7 @@ static void gameCleanup()
 
 static void globalUpdate()
 {
+    inputUpdate();
 }
 
 
