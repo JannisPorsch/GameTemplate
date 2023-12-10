@@ -4,3 +4,6 @@
 [submodule "dependencies/cglm"]
 	path = dependencies/cglm
 	url = https://github.com/recp/cglm.git
+[submodule "dependencies/stbimage/include"]
+	path = dependencies/stbimage/include
+	url = https://github.com/nothings/stb.git

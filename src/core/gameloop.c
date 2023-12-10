@@ -3,6 +3,7 @@
 #include "window.h"
 #include "io/options.h"
 #include "io/input.h"
+#include "renderPipeline/render.h"
 
 
 
@@ -77,6 +78,13 @@ static bool gameInit()
         optionsCleanup();
         return false;
     }
+
+    if (!renderPipelineInit())
+    {
+        optionsCleanup();
+        windowCleanup();
+        return false;
+    }
     
     return true;
 }
@@ -84,6 +92,7 @@ static bool gameInit()
 
 static void gameCleanup()
 {
+    renderPipelineCleanup();
     windowCleanup();
     optionsCleanup();
 }
@@ -97,6 +106,8 @@ static void globalUpdate()
 
 static void globalRender(double alpha)
 {
+    render(alpha);
+    
     glfwSwapBuffers(mainWindow.handle);
     glfwPollEvents();
 }

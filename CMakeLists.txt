@@ -10,8 +10,6 @@ find_package(OpenGL REQUIRED)
 FILE(GLOB MAIN
     src/main.c
     src/main.cpp
-    src/main.h
-    src/main.hpp
 )
 
 
@@ -28,7 +26,33 @@ target_include_directories(${PROJECT_NAME}
 )
 
 
+
+
 add_subdirectory(dependencies)
+
+
+
+
+set(DEPLIBRARIES "")
+
+
+FILE(GLOB SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/*)
+FOREACH(dir ${SUBDIRS})
+    IF(IS_DIRECTORY ${dir})
+        
+        get_filename_component(tmp ${dir} NAME)
+
+        FILE(GLOB_RECURSE sources 
+            ${dir}/CMakeLists.txt
+        )
+
+        IF(sources)
+            string(APPEND DEPLIBRARIES ";${tmp}")
+        ENDIF()
+    ENDIF()
+ENDFOREACH()
+
+
 
 
 set(LIBRARIES "")
@@ -61,4 +85,4 @@ FOREACH(dir ${SUBDIRS})
 ENDFOREACH()
 
 
-target_link_libraries(${PROJECT_NAME} ${LIBRARIES} ${OPENGL_LIBRARIES} glad glfw)
+target_link_libraries(${PROJECT_NAME} ${LIBRARIES} ${OPENGL_LIBRARIES} ${DEPLIBRARIES})
