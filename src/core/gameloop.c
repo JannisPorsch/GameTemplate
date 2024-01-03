@@ -4,6 +4,7 @@
 #include "io/options.h"
 #include "io/input.h"
 #include "renderPipeline/render.h"
+#include "renderPipeline/camera.h"
 
 
 
@@ -70,6 +71,8 @@ int gameLoop()
 
 static bool gameInit()
 {
+    cameraInit((vec3){0.f, 0.f, 1.f}, 1, 1);
+    
     if (!optionsInit())
         return false;
 
@@ -85,7 +88,11 @@ static bool gameInit()
         windowCleanup();
         return false;
     }
-    
+
+    int windowWidth, windowHeight;
+    getWindowDimensions(&windowWidth, &windowHeight);
+    updateCameraProj(windowWidth, windowHeight);
+
     return true;
 }
 
@@ -101,6 +108,7 @@ static void gameCleanup()
 static void globalUpdate()
 {
     inputUpdate();
+    cameraUpdate();
 }
 
 

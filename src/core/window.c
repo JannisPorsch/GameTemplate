@@ -1,5 +1,6 @@
 #include "window.h"
 #include "io/options.h"
+#include "renderPipeline/camera.h"
 
 
 
@@ -174,15 +175,56 @@ void setVSync(bool vsync)
 }
 
 
+void getWindowDimensions(int* width, int* height)
+{
+    glfwGetWindowSize(mainWindow.handle, width, height);
+}
+
+
 
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-    // later update camera & gbuffer
+    updateCameraProj(width, height);
+    // later update gbuffer
 }
 
 
 static void mouse_callback(GLFWwindow* window, double xPos, double yPos)
 {
+    float xpos = (float)xPos;
+    float ypos = (float)yPos;
+
+    if (currentCamera->firstMouse)
+    {
+        currentCamera->lastX = xpos;
+        currentCamera->lastY = ypos;
+        currentCamera->firstMouse = false;
+        return;
+    }
+
+    float xoffset = xpos - currentCamera->lastX;
+    float yoffset = currentCamera->lastY - ypos;
+    currentCamera->lastX = xpos;
+    currentCamera->lastY = ypos;
+
+    xoffset *= currentCamera->sensitivity;
+    yoffset *= currentCamera->sensitivity;
+
+    currentCamera->yaw += xoffset;
+    currentCamera->pitch += yoffset;
+
+    if (currentCamera->pitch > 89.0f)
+        currentCamera->pitch = 89.0f;
+    if (currentCamera->pitch < -89.0f)
+        currentCamera->pitch = -89.0f;
+
+    currentCamera->dir[0] = cos(glm_rad(currentCamera->yaw)) * cos(glm_rad(currentCamera->pitch));
+    currentCamera->dir[1] = sin(glm_rad(currentCamera->pitch));
+    currentCamera->dir[2] = sin(glm_rad(currentCamera->yaw)) * cos(glm_rad(currentCamera->pitch));
+    glm_normalize(currentCamera->dir);
+
+    currentCamera->moved = true;
+    updateCameraView(currentCamera);
 }

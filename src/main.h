@@ -31,6 +31,8 @@ typedef uint16_t    u16;
 typedef uint32_t    u32;
 typedef uint64_t    u64;
 
+#define _STDBOOL_H
+#define __bool_true_false_are_defined	1
 typedef u8 bool;
 #define true 1
 #define false 0

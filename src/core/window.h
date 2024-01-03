@@ -40,6 +40,9 @@ void setFullscreen(bool fullscreen);
 void setVSync(bool vsync);
 
 
+void getWindowDimensions(int* width, int* height);
+
+
 
 
 extern WINDOW mainWindow;
